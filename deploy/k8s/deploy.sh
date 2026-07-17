@@ -14,12 +14,6 @@ fi
 # shellcheck source=/dev/null
 set -o allexport; source "$ENV_FILE"; set +o allexport
 
-echo "==> Building Docker image..."
-docker build -t "$IMAGE" "$REPO_ROOT"
-
-echo "==> Pushing to Docker Hub..."
-docker push "$IMAGE"
-
 echo "==> Applying ConfigMap (with your Elastic URLs)..."
 kubectl create configmap sec-gen-config \
   --from-literal=ELASTIC_NODE="$ELASTIC_NODE" \
