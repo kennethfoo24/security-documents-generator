@@ -13,6 +13,7 @@ Generate synthetic Security data for Elasticsearch and Kibana development, demos
 - Risk engine datasets and ingest loads
 - Cloud Security Posture (Elastic + third-party sources)
 - Entity Store performance data + baseline comparison reports
+- Continuous data flow via the `simulate` command (Kubernetes-ready, all flows on configurable timers)
 
 ## Requirements
 
@@ -189,6 +190,51 @@ Each prompt is skipped individually when its flag is present. Omit any flag to b
 > (it only affects non-employee config such as hosts and cloud resources), so the command runs
 > without prompting.
 
+## Continuous simulation (simulate command)
+
+Run all enabled flows on a continuous timer — ideal for populating a demo or development Elastic serverless project with a constant stream of data.
+
+### Local run
+
+```bash
+yarn start simulate
+```
+
+Uses the built-in default scenario (alerts every 60s, events every 30s, CSP findings every 5m). Press Ctrl-C to stop gracefully.
+
+### Custom scenario
+
+```bash
+yarn start simulate --scenario deploy/scenario.example.json --space my-space
+```
+
+See [`deploy/scenario.example.json`](deploy/scenario.example.json) for the scenario format. Copy it, enable/disable flows, and adjust `intervalMs` and `args`.
+
+### One-shot (for testing)
+
+```bash
+yarn start simulate --once
+```
+
+Runs one emit cycle per flow then exits — useful to confirm connectivity before deploying.
+
+### Environment variables (same as the rest of the CLI)
+
+All connection config is via env vars:
+
+```
+ELASTIC_NODE=https://...
+ELASTIC_API_KEY=...
+KIBANA_NODE=https://...
+KIBANA_API_KEY=...
+SERVERLESS=true
+EVENT_INDEX=logs-testlogs-default
+```
+
+### Running in Kubernetes
+
+See [`deploy/k8s/README.md`](deploy/k8s/README.md) for full instructions on building the Docker image and deploying the runner as a Kubernetes Deployment with liveness/readiness probes.
+
 ## Commands
 
 Detailed command documentation is colocated with command code under `src/commands`.
@@ -229,6 +275,7 @@ Detailed command documentation is colocated with command code under `src/command
 | `generate-cloud-security-posture` (`csp`)                        | Generate CSP findings across sources                                             | `src/commands/generate_cloud_security_posture/README.md` |
 | `generate-correlated-organization-data` (`org-data`)             | Generate correlated organization security integration data                       | `src/commands/org_data/`                                 |
 | `generate-correlated-organization-data-quick` (`org-data-quick`) | Quick correlated organization data generation with defaults                      | `src/commands/org_data/`                                 |
+| `simulate` (alias: `run`)                                        | Run all enabled flows continuously on configurable timers                        | `src/commands/simulate/`                                 |
 
 ### Quick command list
 
@@ -252,6 +299,8 @@ Detailed command documentation is colocated with command code under `src/command
   - `generate-cloud-security-posture` (`csp`)
 - **Correlated Organization Data**
   - `generate-correlated-organization-data` (`org-data`), `generate-correlated-organization-data-quick` (`org-data-quick`)
+- **Continuous simulation**
+  - `simulate` (`run`) — continuous multi-flow runner
 
 ## Agent skills
 
