@@ -99,7 +99,7 @@ const CSP_SCORES_INDEX_NAME = 'logs-cloud_security_posture.scores-default';
  * 3. If not, creates an agent policy + CSP package policy to trigger initialization
  * 4. Waits for the scores index to be created by the plugin
  */
-async function installCspIntegration(): Promise<void> {
+export async function installCspIntegration(): Promise<void> {
   await installPackage({ packageName: CSP_PACKAGE_NAME });
 
   // Check if the scores index already exists (plugin already initialized)

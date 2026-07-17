@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sec-gen-config
+  namespace: default
+data:
+  # Non-secret configuration
+  ELASTIC_NODE: 'https://your-deployment.es.region.cloud.elastic.co'
+  KIBANA_NODE: 'https://your-deployment.kb.region.cloud.elastic.co'
+  SERVERLESS: 'true'
+  EVENT_INDEX: 'logs-testlogs-default'
+  EVENT_DATE_OFFSET_HOURS: '0'
+  LOG_LEVEL: 'info'
+  SCENARIO_FILE: '/config/scenario.json'
+  # Scenario file (edit this to change which flows run and at what rate)
+  scenario.json: |
+    {
+      "space": "default",
+      "flows": [
+        { "flow": "alerts",  "enabled": true,  "intervalMs": 60000,  "args": { "alertCount": 50, "hostCount": 10, "userCount": 10 } },
+        { "flow": "events",  "enabled": true,  "intervalMs": 30000,  "args": { "n": 200 } },
+        { "flow": "csp",     "enabled": true,  "intervalMs": 300000, "args": { "dataSources": ["all"], "findingsCount": 20 } },
+        { "flow": "org-data","enabled": false, "intervalMs": 3600000,"args": { "size": "small" } }
+      ]
+    }

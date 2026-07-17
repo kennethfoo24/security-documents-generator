@@ -1,0 +1,41 @@
+{
+  "_comment": "Copy this file and mount it as a ConfigMap. Set SCENARIO_FILE=/config/scenario.json in the Deployment.",
+  "space": "default",
+  "flows": [
+    {
+      "flow": "alerts",
+      "enabled": true,
+      "intervalMs": 60000,
+      "args": { "alertCount": 50, "hostCount": 10, "userCount": 10 },
+      "_comment": "Generates 50 alerts every 60s"
+    },
+    {
+      "flow": "events",
+      "enabled": true,
+      "intervalMs": 30000,
+      "args": { "n": 200 },
+      "_comment": "Generates 200 events every 30s"
+    },
+    {
+      "flow": "csp",
+      "enabled": true,
+      "intervalMs": 300000,
+      "args": { "dataSources": ["all"], "findingsCount": 20 },
+      "_comment": "Generates 20 CSP findings every 5 minutes across all sources"
+    },
+    {
+      "flow": "org-data",
+      "enabled": false,
+      "intervalMs": 3600000,
+      "args": { "size": "small" },
+      "_comment": "Disabled by default. Set enabled=true to generate org data hourly."
+    },
+    {
+      "flow": "entity-store",
+      "enabled": false,
+      "intervalMs": 3600000,
+      "args": {},
+      "_comment": "Disabled by default (entity store setup must be done manually first)."
+    }
+  ]
+}
