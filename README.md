@@ -15,17 +15,44 @@ Generate synthetic Security data for Elasticsearch and Kibana development, demos
 - Entity Store performance data + baseline comparison reports
 - Continuous data flow via the `simulate` command (Kubernetes-ready, all flows on configurable timers)
 
+## Quick setup (Elastic Serverless)
+
+**Step 1 — Install dependencies**
+
+```bash
+yarn
+```
+
+**Step 2 — Create your `.env` file**
+
+```bash
+cp .env.example .env
+```
+
+**Step 3 — Fill in your 4 values** (open `.env` in any editor)
+
+| Variable          | Where to find it                                      |
+| ----------------- | ----------------------------------------------------- |
+| `ELASTIC_NODE`    | Elastic Cloud → your project → Connection details     |
+| `KIBANA_NODE`     | Elastic Cloud → your project → Connection details     |
+| `ELASTIC_API_KEY` | Kibana → Stack Management → API Keys → Create API key |
+| `KIBANA_API_KEY`  | Same page — you can reuse the same key for both       |
+
+**Step 4 — Start the continuous data flow**
+
+```bash
+source .env && yarn start simulate
+```
+
+That's it. Alerts every 60s, events every 30s, and CSP findings every 5m will start flowing into your serverless project. Press `Ctrl-C` to stop.
+
+---
+
 ## Requirements
 
 - Node.js `24.13.1`
 - Yarn `^1.22.22`
 - Access to Elasticsearch and Kibana
-
-## Install
-
-```bash
-yarn
-```
 
 ## Configuration
 
