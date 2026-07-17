@@ -8,19 +8,17 @@
 
 ## Deploy in one command
 
-**1. Open `deploy/k8s/deploy.sh` and fill in the 4 values at the top:**
+**1. Fill in your `.env` file at the repo root** (gitignored — never committed):
 
 ```bash
-ELASTIC_NODE="https://YOUR_PROJECT.es.REGION.aws.elastic.cloud"
-KIBANA_NODE="https://YOUR_PROJECT.kb.REGION.aws.elastic.cloud"
-ELASTIC_API_KEY="your_es_api_key"
-KIBANA_API_KEY="your_kibana_api_key"
+cp .env.example .env
+# then open .env and fill in the 4 values
 ```
 
 Get the URLs from: Elastic Cloud → your project → **Connection details**
 Get the API keys from: Kibana → Stack Management → **API Keys** → Create API key
 
-**2. Run it:**
+**2. Run the deploy script:**
 
 ```bash
 bash deploy/k8s/deploy.sh

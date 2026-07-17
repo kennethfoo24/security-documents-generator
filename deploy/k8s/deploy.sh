@@ -1,16 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# ─── Fill in these 4 values ───────────────────────────────────────────────────
-ELASTIC_NODE="https://REPLACE_WITH_YOUR_ES_URL"
-KIBANA_NODE="https://REPLACE_WITH_YOUR_KIBANA_URL"
-ELASTIC_API_KEY="REPLACE_WITH_YOUR_ES_API_KEY"
-KIBANA_API_KEY="REPLACE_WITH_YOUR_KIBANA_API_KEY"
-# ──────────────────────────────────────────────────────────────────────────────
-
 IMAGE="kennethfoo24/security-generator:latest"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+# Load credentials from .env (gitignored — never committed)
+ENV_FILE="$REPO_ROOT/.env"
+if [[ ! -f "$ENV_FILE" ]]; then
+  echo "Error: $ENV_FILE not found. Copy .env.example to .env and fill in your values."
+  exit 1
+fi
+# shellcheck source=/dev/null
+set -o allexport; source "$ENV_FILE"; set +o allexport
 
 echo "==> Building Docker image..."
 docker build -t "$IMAGE" "$REPO_ROOT"
