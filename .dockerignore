@@ -1,0 +1,13 @@
+node_modules/
+logs/
+config.json
+.git/
+.gitignore
+.husky/
+.planning/
+.superpowers/
+.buildkite/
+.github/
+*.md
+!README.md
+deploy/
