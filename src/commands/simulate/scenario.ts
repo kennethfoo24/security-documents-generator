@@ -15,9 +15,19 @@ export interface Scenario {
 
 export const DEFAULT_SCENARIO: Scenario = {
   flows: [
-    { flow: 'alerts', enabled: true, intervalMs: 60_000, args: { alertCount: 50, hostCount: 10, userCount: 10 } },
+    {
+      flow: 'alerts',
+      enabled: true,
+      intervalMs: 60_000,
+      args: { alertCount: 50, hostCount: 10, userCount: 10 },
+    },
     { flow: 'events', enabled: true, intervalMs: 30_000, args: { n: 200 } },
-    { flow: 'csp', enabled: true, intervalMs: 300_000, args: { dataSources: ['all'], findingsCount: 20 } },
+    {
+      flow: 'csp',
+      enabled: true,
+      intervalMs: 300_000,
+      args: { dataSources: ['all'], findingsCount: 20 },
+    },
     { flow: 'org-data', enabled: false, intervalMs: 3_600_000, args: { size: 'small' } },
     { flow: 'entity-store', enabled: false, intervalMs: 3_600_000, args: {} },
   ],
@@ -67,6 +77,7 @@ function loadFromPath(filePath: string): Scenario {
   } catch (err) {
     throw new Error(
       `Scenario file not found or unreadable: "${filePath}": ${err instanceof Error ? err.message : String(err)}`,
+      { cause: err },
     );
   }
 
@@ -76,6 +87,7 @@ function loadFromPath(filePath: string): Scenario {
   } catch (err) {
     throw new Error(
       `Scenario file contains invalid JSON: "${filePath}": ${err instanceof Error ? err.message : String(err)}`,
+      { cause: err },
     );
   }
 
