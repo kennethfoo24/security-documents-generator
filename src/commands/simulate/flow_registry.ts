@@ -3,6 +3,7 @@ import {
   generateCloudSecurityPosture,
   installCspIntegration,
   resolveDataSources,
+  ALL_DATA_SOURCES,
 } from '../cloud_security_posture/index.ts';
 import { ensureSpace } from '../../utils/ensure_space.ts';
 import { runOrgData } from '../org_data/org_data.ts';
@@ -63,6 +64,16 @@ export const FLOW_REGISTRY: Record<string, FlowDefinition> = {
         ? (args.dataSources as string[])
         : ['all'];
       const findingsCount = typeof args.findingsCount === 'number' ? args.findingsCount : 20;
+
+      // Validate data sources before calling resolveDataSources, which calls
+      // process.exit(1) on unrecognized inputs — that cannot be caught by the runner.
+      const validCspInputs = new Set<string>([...ALL_DATA_SOURCES, 'all', 'elastic_all']);
+      const invalidSources = dataSources.filter((s) => !validCspInputs.has(s));
+      if (invalidSources.length > 0) {
+        throw new Error(
+          `Unknown data source(s): ${invalidSources.join(', ')}. Valid options: all, elastic_all, ${ALL_DATA_SOURCES.join(', ')}`,
+        );
+      }
 
       await generateCloudSecurityPosture({
         dataSources: resolveDataSources(dataSources),

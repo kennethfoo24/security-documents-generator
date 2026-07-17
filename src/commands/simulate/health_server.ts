@@ -1,5 +1,5 @@
 import { createServer } from 'node:http';
-import { log } from '../../utils/logger.js';
+import { log } from '../../utils/logger.ts';
 
 /**
  * Start the health/readiness HTTP server.

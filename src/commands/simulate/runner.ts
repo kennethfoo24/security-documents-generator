@@ -34,6 +34,11 @@ export async function runSimulator(opts: RunnerOptions): Promise<void> {
     const space = opts.space ?? scenario.space ?? 'default';
     const enabledFlows = scenario.flows.filter((f) => f.enabled !== false);
 
+    // Validate all flow names upfront so misconfiguration fails with a clear error
+    for (const flowConfig of enabledFlows) {
+      getFlow(flowConfig.flow); // throws "Unknown flow: X. Available: ..." if not found
+    }
+
     log.info(`Starting simulate runner: ${enabledFlows.length} flows enabled, space="${space}"`);
     for (const f of enabledFlows) {
       log.info(`  [${f.flow}] every ${f.intervalMs}ms`);
