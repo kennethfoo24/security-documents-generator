@@ -1,85 +1,78 @@
 # Kubernetes Deployment
 
-Run `sec-gen-runner` continuously in Kubernetes, generating security data on a configurable schedule.
-
 ## Prerequisites
 
-- Docker (to build and push the image)
-- `kubectl` configured against your target cluster
-- An Elastic serverless project with:
-  - An Elasticsearch API key (`ELASTIC_API_KEY`)
-  - A Kibana API key (`KIBANA_API_KEY`)
+- Docker (logged in to Docker Hub: `docker login`)
+- `kubectl` connected to your cluster (`kubectl get nodes` works)
+- An Elastic Serverless project with API keys
 
-## Build and push the image
+## Deploy in one command
 
-```bash
-docker build -t your-registry/sec-gen-runner:latest .
-docker push your-registry/sec-gen-runner:latest
-```
-
-## Configure
-
-1. Edit `deploy/k8s/configmap.yaml` and replace the placeholder URLs:
-   - `ELASTIC_NODE` — your Elasticsearch endpoint
-   - `KIBANA_NODE` — your Kibana endpoint
-2. Edit `deploy/k8s/deployment.yaml` and replace the `image:` field with your registry path.
-
-## Create credentials
-
-**Option A** — edit `secret.yaml` with base64-encoded values, then apply:
+**1. Open `deploy/k8s/deploy.sh` and fill in the 4 values at the top:**
 
 ```bash
-echo -n 'your-es-key' | base64
-# paste the output into secret.yaml under ELASTIC_API_KEY
-kubectl apply -f deploy/k8s/secret.yaml
+ELASTIC_NODE="https://YOUR_PROJECT.es.REGION.aws.elastic.cloud"
+KIBANA_NODE="https://YOUR_PROJECT.kb.REGION.aws.elastic.cloud"
+ELASTIC_API_KEY="your_es_api_key"
+KIBANA_API_KEY="your_kibana_api_key"
 ```
 
-**Option B** — use kubectl directly (no file with credentials on disk):
+Get the URLs from: Elastic Cloud → your project → **Connection details**
+Get the API keys from: Kibana → Stack Management → **API Keys** → Create API key
+
+**2. Run it:**
 
 ```bash
-kubectl create secret generic sec-gen-credentials \
-  --from-literal=ELASTIC_API_KEY=<your-es-key> \
-  --from-literal=KIBANA_API_KEY=<your-kibana-key>
+bash deploy/k8s/deploy.sh
 ```
 
-> **Note:** Do not commit `secret.yaml` with real values. It contains placeholder values by design.
+This will:
 
-## Deploy
+- Build and push `kennethfoo24/security-generator:latest` to Docker Hub
+- Create the ConfigMap and Secret in your cluster
+- Deploy the runner as a Deployment (1 replica, always-restart)
 
-```bash
-kubectl apply -f deploy/k8s/configmap.yaml
-kubectl apply -f deploy/k8s/deployment.yaml
-```
-
-## Watch logs
+**3. Tail the logs:**
 
 ```bash
 kubectl logs deploy/sec-gen-runner -f
 ```
 
-## Change scenario (which flows run, at what rate)
+You'll see alerts emitting every 60s, events every 30s, CSP findings every 5m.
 
-Edit the `scenario.json` key in `deploy/k8s/configmap.yaml`, then apply and restart:
+---
+
+## Update the scenario (change which flows run / how often)
+
+Edit `deploy/scenario.example.json` then re-run `deploy/k8s/deploy.sh`.
+
+Or to update in-place without rebuilding the image:
 
 ```bash
-kubectl apply -f deploy/k8s/configmap.yaml
+kubectl create configmap sec-gen-config \
+  --from-file=scenario.json=deploy/scenario.example.json \
+  --dry-run=client -o yaml | kubectl apply -f -
+
 kubectl rollout restart deployment/sec-gen-runner
 ```
 
-You can also copy `deploy/scenario.example.json` as a starting point — it documents every field.
-
 ## Scale volume
 
-To generate more data per iteration, increase the flow `args` in the scenario ConfigMap:
+Increase numbers in `deploy/scenario.example.json`:
 
-- `alertCount`, `hostCount`, `userCount` — controls alert flow output
-- `n` — controls event flow output
+- `alertCount`, `hostCount`, `userCount` — controls alert output
+- `n` — controls event output
 - `findingsCount` — controls CSP findings output
 
-Apply and restart after editing (see above).
+## Tear down
+
+```bash
+kubectl delete deployment sec-gen-runner
+kubectl delete configmap sec-gen-config
+kubectl delete secret sec-gen-credentials
+```
 
 ## Pod restart behaviour
 
-The Deployment uses `restartPolicy: Always` (the Kubernetes default). If the pod crashes (e.g., an unhandled error calling `process.exit`), it restarts automatically. All data generation is idempotent, so restarts are safe.
-
-`terminationGracePeriodSeconds: 30` gives the SIGTERM handler enough time to finish any in-flight emit before the pod is forcefully terminated.
+`restartPolicy: Always` means if the pod crashes it restarts automatically.
+`terminationGracePeriodSeconds: 30` gives the SIGTERM handler time to finish in-flight emits.

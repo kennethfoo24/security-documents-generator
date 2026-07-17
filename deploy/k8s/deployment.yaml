@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: sec-gen-runner
-          image: your-registry/sec-gen-runner:latest # replace with your image
+          image: kennethfoo24/security-generator:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
