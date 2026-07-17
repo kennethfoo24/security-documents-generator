@@ -25,10 +25,10 @@
     },
     {
       "flow": "org-data",
-      "enabled": false,
+      "enabled": true,
       "intervalMs": 3600000,
       "args": { "size": "small" },
-      "_comment": "Disabled by default. Set enabled=true to generate org data hourly."
+      "_comment": "Generates correlated org data (users, hosts, AD, Okta) hourly."
     },
     {
       "flow": "entity-store",
